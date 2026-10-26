@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Pytest cache
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Output files (generated at runtime)
+data/processed_*.csv
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
