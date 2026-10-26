@@ -1,0 +1,57 @@
+[
+  {
+    "submission_id": "SUB-001",
+    "vendor_name": "Acme Supplies GmbH",
+    "invoice_number": "INV-2024-0891",
+    "invoice_date": "2024-10-15",
+    "amount_eur": 4250.00,
+    "currency": "EUR",
+    "material_description": "Office furniture — 10 ergonomic chairs",
+    "submitter_email": "procurement@company.com",
+    "notes": ""
+  },
+  {
+    "submission_id": "SUB-002",
+    "vendor_name": "FastParts Ltd",
+    "invoice_number": "INV-2024-0144",
+    "invoice_date": "2024-10-20",
+    "amount_eur": 62000.00,
+    "currency": "EUR",
+    "material_description": "Server rack components — batch order",
+    "submitter_email": "it@company.com",
+    "notes": "Approved by CTO verbally"
+  },
+  {
+    "submission_id": "SUB-003",
+    "vendor_name": "",
+    "invoice_number": "INV-2024-0999",
+    "invoice_date": "2024-10-18",
+    "amount_eur": 850.00,
+    "currency": "EUR",
+    "material_description": "Cleaning supplies Q4",
+    "submitter_email": "facilities@company.com",
+    "notes": ""
+  },
+  {
+    "submission_id": "SUB-004",
+    "vendor_name": "Global Tech AG",
+    "invoice_number": "INV-2024-0512",
+    "invoice_date": "2027-01-01",
+    "amount_eur": 1200.00,
+    "currency": "USD",
+    "material_description": "Software licences — annual renewal",
+    "submitter_email": "finance@company.com",
+    "notes": ""
+  },
+  {
+    "submission_id": "SUB-005",
+    "vendor_name": "Berlin Office Pro",
+    "invoice_number": "INV-2024-0333",
+    "invoice_date": "2024-09-30",
+    "amount_eur": 399.00,
+    "currency": "EUR",
+    "material_description": "Printer cartridges — 12 units",
+    "submitter_email": "admin@company.com",
+    "notes": ""
+  }
+]
