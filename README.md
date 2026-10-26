@@ -1,110 +1,117 @@
-# Vendor Invoice & Material Receipt Processor
+# 🧾 vendor invoice processor
 
-A Python automation pipeline that validates vendor invoice and material receipt
-submissions, flags anomalies, and produces a structured CSV audit log.
-
-Originally built as a **Power Automate cloud flow** (Microsoft Forms trigger →
-validation conditions → SharePoint log). This Python implementation reproduces
-the same pipeline so it can run anywhere — locally, in a container, or on a
-schedule via cron or Airflow.
+because manually checking 50 invoice submissions in a spreadsheet is not going to cut it anymore.
 
 ---
 
-## What it does
+## what this does
+
+someone submits a vendor invoice or material receipt via a form. this pipeline picks it up, runs it through a set of validation rules, and tells you whether it's good to go, needs a second look, or should be thrown back.
 
 ```
-Form submission (JSON)
+form submission (json)
         │
         ▼
-┌───────────────────┐
-│  Load submissions │  ← reads from JSON file (or swap in an API call)
-└────────┬──────────┘
-         │
-         ▼
-┌───────────────────┐
-│  Validate each    │  ← required fields, amount range, date, currency
-└────────┬──────────┘
-         │
-         ├──► approved   all rules pass
-         ├──► flagged    soft issue (high amount, unsupported currency, future date)
-         └──► rejected   hard failure (missing field, zero amount, bad data)
-         │
-         ▼
-┌───────────────────┐
-│  Write CSV log    │  ← data/processed_YYYYMMDD.csv
-└───────────────────┘
+┌─────────────────────┐
+│  load submissions   │  reads from json (swap in any api call you like)
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  validate each one  │  required fields, amount range, date sanity, currency
+└──────────┬──────────┘
+           │
+           ├──► ✅ approved    everything checks out
+           ├──► ⚠️  flagged    something's off — human should look
+           └──► ❌ rejected    hard failure — missing data or clearly wrong
+           │
+           ▼
+┌─────────────────────┐
+│  write csv audit log│  data/processed_YYYYMMDD.csv
+└─────────────────────┘
 ```
 
 ---
 
-## Validation rules
+## validation rules
 
-| Rule | Threshold | Status if triggered |
+| rule | detail | outcome |
 |---|---|---|
-| Required fields present | vendor name, invoice number, date, amount, description | rejected |
-| Amount in range | €0.01 – €50,000 | flagged (above) / rejected (zero/negative) |
-| Invoice date not in future | today's date | flagged |
-| Currency supported | EUR, USD, GBP | flagged |
+| required fields | vendor name, invoice number, date, amount, description | ❌ rejected if missing |
+| amount range | must be between €0.01 and €50,000 | ⚠️ flagged if over / ❌ rejected if zero |
+| invoice date | can't be in the future (yes, this has happened) | ⚠️ flagged |
+| currency | EUR, USD, GBP only | ⚠️ flagged otherwise |
 
 ---
 
-## Quick start
+## quick start
 
 ```bash
-# Clone and run (Python 3.10+ required, no third-party packages needed)
 git clone https://github.com/mansipurohit11/vendor-invoice-automation
 cd vendor-invoice-automation
 
-# Process the included sample data
+# no pip install needed — pure standard library
 python invoice_processor.py
 
-# Dry-run (validate only, no file written)
+# just validate, don't write anything
 python invoice_processor.py --dry-run
 
-# Custom input file
-python invoice_processor.py --input my_submissions.json --output results/out.csv
+# custom input/output
+python invoice_processor.py --input my_data.json --output results/out.csv
 ```
+
+requires python 3.10+. that's it.
 
 ---
 
-## Sample output
+## what the output looks like
 
 ```
-2024-10-26 11:00:01  INFO      Loading submissions from data/sample_submissions.json
-2024-10-26 11:00:01  INFO      Loaded 5 submissions
+2024-10-26 11:00:01  INFO      loaded 5 submissions
 2024-10-26 11:00:01  INFO      ──────────────────────────────────────────────────
 2024-10-26 11:00:01  INFO      SUMMARY  total=5  approved=2  flagged=2  rejected=1
 2024-10-26 11:00:01  INFO      ──────────────────────────────────────────────────
-2024-10-26 11:00:01  INFO      Items requiring attention:
-2024-10-26 11:00:01  INFO        [FLAGGED]  SUB-002 | FastParts Ltd   | AMOUNT_EXCEEDS_THRESHOLD:62000.00
-2024-10-26 11:00:01  INFO        [FLAGGED]  SUB-004 | Global Tech AG  | INVOICE_DATE_FUTURE; UNSUPPORTED_CURRENCY:USD
-2024-10-26 11:00:01  INFO        [REJECTED] SUB-003 |                 | MISSING_FIELD:vendor_name
-2024-10-26 11:00:01  INFO      Results written → data/processed_20241026.csv
+2024-10-26 11:00:01  INFO      items requiring attention:
+2024-10-26 11:00:01  INFO        [FLAGGED]  SUB-002 | FastParts Ltd  | AMOUNT_EXCEEDS_THRESHOLD:62000.00
+2024-10-26 11:00:01  INFO        [FLAGGED]  SUB-004 | Global Tech AG | INVOICE_DATE_FUTURE; UNSUPPORTED_CURRENCY:USD
+2024-10-26 11:00:01  INFO        [REJECTED] SUB-003 |               | MISSING_FIELD:vendor_name
 ```
 
 ---
 
-## Run tests
+## run the tests
 
 ```bash
 pip install pytest
 pytest test_invoice_processor.py -v
 ```
 
----
-
-## Extending this pipeline
-
-- **Swap the data source**: replace `load_submissions()` with a call to the
-  Microsoft Forms API, a SharePoint list, or any REST endpoint.
-- **Add notification**: send flagged items to a Slack webhook or email via
-  `smtplib` — same pattern as the Power Automate email action.
-- **Schedule it**: drop `invoice_processor.py` into an Airflow DAG or a
-  GitHub Actions cron workflow for fully automated daily runs.
+8 tests. all pass. (please tell me if they don't.)
 
 ---
 
-## Skills demonstrated
+## extending it
 
-`Python` · `data validation` · `ETL pipelines` · `automation` · `CSV/JSON` ·
-`unit testing (pytest)` · `argparse` · `logging` · `dataclasses`
+this was originally a **power automate cloud flow** (microsoft forms → validation conditions → sharepoint log). the logic is the same, just in python now so it can run anywhere.
+
+some things you could swap in without much effort:
+
+- **different data source** — replace `load_submissions()` with a real api call, a database query, or a sharepoint connector
+- **notifications** — send flagged items to slack or email with a few extra lines
+- **scheduling** — drop it into an airflow dag or a github actions cron job and forget about it
+
+---
+
+## what i learned
+
+- validating data is 80% of the actual work. the "automation" part is easy once the rules are clear.
+- zero-amount invoices are more common than you'd expect.
+- writing tests first makes the validation logic much cleaner.
+
+---
+
+## stack
+
+`python 3.10+` · `csv` · `json` · `dataclasses` · `argparse` · `logging` · `pytest`
+
+no third-party packages required for the main script. refreshing.
