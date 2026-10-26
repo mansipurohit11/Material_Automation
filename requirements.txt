@@ -1,0 +1,5 @@
+# No third-party dependencies — uses Python 3.10+ standard library only.
+# (csv, json, dataclasses, argparse, logging, pathlib, datetime)
+#
+# To run tests:
+#   pip install pytest
